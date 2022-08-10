@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: Posts Display Shortcode
-Plugin URI:
-Description: [pds] [pds post_type='' limit='' cate='' excerpt_length='' feat_img='']
+Plugin URI: n/a
+Description: [pds] [pds post_type='' limit='' cate='' excerpt_length='' feat_img=''] | Dated: 10th Aug, 2022
 Author:  Aamir Hussain
 Version: 1.0
-Author URI:
-Text Domain: wp_lite_signup
+Author URI: n/a
+Text Domain:  
  */
 add_shortcode('pds', 'loop_posts');
 function loop_posts($atts)
