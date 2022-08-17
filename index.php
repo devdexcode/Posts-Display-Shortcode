@@ -4,7 +4,7 @@ Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
 Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 3.1
+Version: 3.2
 Author URI: n/a
 Text Domain:  
  */
@@ -185,7 +185,7 @@ function display_author($the_id){
 }
 //DISPLAY DATE
 function display_date($the_id){
-    echo '<em>'.get_the_date( $date_format, $the_id ).'</em>';
+    echo '<em class="date">'.get_the_date( $date_format, $the_id ).'</em>';
 }
 // DISPLAY PAGINATION
 function pagination_bar( $custom_query ) {
