@@ -2,9 +2,9 @@
 /*
 Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
-Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' limit='' cate='' excerpt_length='' feat_img='' feat_img_height=''] | Dated: 17 Aug, 2022
+Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 2.0
+Version: 3.0
 Author URI: n/a
 Text Domain:  
  */
@@ -18,14 +18,15 @@ function loop_posts($atts)
     }
 // print_r($atts); exit;
     $n = 1;
+    $paged = ( get_query_var( 'paged' ) ) ? get_query_var( 'paged' ) : 1;
     $the_args = array(
         'post_type'         => $post_type,
         'category_name'     => $cate,
         'posts_per_page'    => $per_page,
         'orderby'           => $order_by,
         'order'             => $order,
-        'posts_per_page'    => $limit,
-        'post__not_in'      => array(get_the_ID()),
+        // 'post__not_in'      => array(get_the_ID()),
+        'paged'             => $paged
     );
 
   if(!post_type_exists( $post_type )){
@@ -35,6 +36,7 @@ function loop_posts($atts)
 
     $query = new WP_Query($the_args);
     ob_start();
+    if($query->have_posts()):
     ?>
 <div class="row <?php apply_css_class($row_class)?>">
     <?php while ($query->have_posts()): $query->the_post();?>
@@ -45,10 +47,18 @@ function loop_posts($atts)
 
 	    </div>
 	    
-        <?php endwhile;?>
+        <?php endwhile; ?>
 </div>
-<?php
 
+    <div class="row pb-2 pl-0 pr-0 ml-auto mr-auto">
+        <div class="col ml-0 pl-0">
+            <nav class="pagination">
+            <?php pagination_bar($query); wp_reset_postdata();?>
+            </nav>
+        </div>
+    </div>
+<?php
+    endif;
 $html = ob_get_clean();
     return $html;
 }
@@ -147,4 +157,20 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
 }    
     $html = ob_get_clean();
     echo $html;
+}
+
+// DISPLAY PAGINATION
+function pagination_bar( $custom_query ) {
+    $total_pages = $custom_query->max_num_pages;
+    $big = 999999999; // need an unlikely integer
+    if ($total_pages > 1){
+        $current_page = max(1, get_query_var('paged'));
+        echo "<style>  .pagination a, .pagination span {    position: relative;    float: left;    padding: 6px 12px;    margin-left: -1px;    line-height: 1.42857143;    color: #337ab7;    text-decoration: none;    background-color: #fff;    border: 1px solid #ddd;}</style>";
+        echo paginate_links(array(
+            'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
+            'format' => '?paged=%#%',
+            'current' => $current_page,
+            'total' => $total_pages,
+        ));
+    }
 }
