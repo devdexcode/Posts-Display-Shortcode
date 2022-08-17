@@ -2,7 +2,7 @@
 /*
 Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
-Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height=''] | Dated: 17 Aug, 2022
+Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
 Version: 3.0
 Author URI: n/a
@@ -25,7 +25,7 @@ function loop_posts($atts)
         'posts_per_page'    => $per_page,
         'orderby'           => $order_by,
         'order'             => $order,
-        // 'post__not_in'      => array(get_the_ID()),
+        'post__not_in'      => array(get_the_ID()),
         'paged'             => $paged
     );
 
@@ -43,7 +43,7 @@ function loop_posts($atts)
 <?php $n++;?>
 	    <div class="<?php apply_css_class($col_class)?> portfolio-item post-<?php echo $n?>">
             
-        <?php the_layout($feat_img, get_the_ID(), '32', $img_position);?> 
+        <?php the_layout($feat_img, get_the_ID(), '32', $img_position, $display_cate);?> 
 
 	    </div>
 	    
@@ -113,13 +113,16 @@ function apply_css_class($css_class){
 
 
 //THE LAYOUT
-function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img_position=null){
+function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img_position=null, $display_cate=null, $display_author=null, $date_format=null ){
     ob_start();
     ?><?php if($img_position =="" || $img_position == "top"){?>
         <div class="card h-100">
         <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->   
         <div class="card-body">
             <?php  display_title($the_id);?>
+            <div class="date"><?php display_date($date_format,get_the_ID())?></div>
+            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
+            | <?php  display_author($the_id); ?></div>
             <?php display_excerpt($the_id, $excerpt_length);?>
         </div><!---ends card body--->
         </div> <!---ends card div--->
@@ -129,6 +132,8 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
          
         <div class="card-body">
             <?php  display_title($the_id);?>
+            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
+            | <?php  display_author($the_id); ?></div>
             <?php display_excerpt($the_id, $excerpt_length);?>
         </div><!---ends card body--->
         <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->  
@@ -140,6 +145,8 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
         <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
         <div class="col-md-8 p-0 pl-4 pr-3 pt-3">
             <?php  display_title($the_id);?>
+            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
+            | <?php  display_author($the_id); ?></div>
             <?php display_excerpt($the_id, $excerpt_length);?>
         </div>
     </div>
@@ -149,6 +156,8 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
     <div class="row border ml-auto mr-auto">
     <div class="col-md-8 p-0 pr-4 pl-3 pt-3">
             <?php  display_title($the_id);?>
+            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
+            | <?php  display_author($the_id); ?></div>
             <?php display_excerpt($the_id, $excerpt_length);?>
         </div>
         <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
@@ -158,7 +167,26 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
     $html = ob_get_clean();
     echo $html;
 }
+// DISPLAY CATEGORIES
 
+function display_categories($the_id){
+    $cats = get_the_category($the_id);
+    ob_start();
+    foreach ( $cats as $cat ): ?>
+ <a href="<?php echo get_category_link($cat->cat_ID); ?>" class="category"><?php echo $cat->name; ?></a> 
+    <?php endforeach;
+    $html = ob_get_clean();
+    echo $html;
+}
+
+//DISPLAY AUTHOR NAME
+function display_author($the_id){
+    echo "<span class='author'> By ".ucfirst(get_the_author())."</span>";
+}
+//DISPLAY DATE
+function display_date($the_id){
+    echo '<em>'.get_the_date( $date_format, $the_id ).'</em>';
+}
 // DISPLAY PAGINATION
 function pagination_bar( $custom_query ) {
     $total_pages = $custom_query->max_num_pages;
