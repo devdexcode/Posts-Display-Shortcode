@@ -4,7 +4,7 @@ Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
 Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 3.0
+Version: 3.1
 Author URI: n/a
 Text Domain:  
  */
