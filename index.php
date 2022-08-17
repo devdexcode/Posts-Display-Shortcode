@@ -2,9 +2,9 @@
 /*
 Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
-Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate=''] | Dated: 17 Aug, 2022
+Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate='' link_title='' display_price=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 3.2
+Version: 4
 Author URI: n/a
 Text Domain:  
  */
@@ -43,7 +43,7 @@ function loop_posts($atts)
 <?php $n++;?>
 	    <div class="<?php apply_css_class($col_class)?> portfolio-item post-<?php echo $n?>">
             
-        <?php the_layout($feat_img, get_the_ID(), '32', $img_position, $display_cate);?> 
+        <?php the_layout($feat_img, get_the_ID(), '32', $img_position, $display_cate,$display_author,$date_format, $link_title,$display_price, $post_type);?> 
 
 	    </div>
 	    
@@ -69,6 +69,72 @@ $html = ob_get_clean();
  * FUNCTIONS 
  *
  * * * */
+//THE LAYOUT
+function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img_position=null, $display_cate=null, $display_author=null, $date_format=null, $link_title=null, $display_price=null, $post_type=null){
+    ob_start();
+    ?><?php if($img_position =="" || $img_position == "top"){?>
+        <div class="card h-100">
+        <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->   
+        <div class="card-body">
+        <?php  display_title($the_id);?>
+            <?php display_date($date_format,$the_id)?>
+            <?php display_categories($display_cate, $the_id);?>
+             <?php  display_author($display_author, $the_id); ?> 
+            <?php display_excerpt($the_id, $excerpt_length);?>
+            <?php display_price($post_type, $display_price, $the_id );?>
+        </div><!---ends card body--->
+        <?php read_more(get_the_ID(), $link_title);?>
+        </div> <!---ends card div--->
+    <?php 
+}elseif($img_position == "bottom"){?>
+        <div class="card h-100">
+         
+        <div class="card-body">
+        <?php  display_title($the_id);?>
+            <?php display_date($date_format,$the_id)?>
+            <?php display_categories($display_cate, $the_id);?>
+            <?php  display_author($display_author, $the_id); ?> 
+            <?php display_excerpt($the_id, $excerpt_length);?>  
+            <?php display_price($post_type, $display_price, $the_id );?>        
+        </div><!---ends card body--->
+        <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->  
+        <?php read_more(get_the_ID(), $link_title);?>
+        </div> <!---ends card div--->
+    <?php 
+}elseif($img_position == "left"){
+    ?>
+    <div class="row border ml-auto mr-auto">
+        <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
+        <div class="col-md-8 p-0 pl-4 pr-3 pt-3">
+        <?php  display_title($the_id);?>
+            <?php display_date($date_format,$the_id)?>
+            <?php display_categories($display_cate, $the_id);?>
+            <?php  display_author($display_author, $the_id); ?> 
+            <?php display_excerpt($the_id, $excerpt_length);?>
+            <?php display_price($post_type, $display_price, $the_id );?>
+        </div>
+        <div class="col-md-12 pl-0 pr-0 pt-2 text-right"><?php read_more(get_the_ID(), $link_title);?></div>
+    </div>
+    <?php
+}elseif($img_position == "right"){
+    ?>
+    <div class="row border ml-auto mr-auto">
+    <div class="col-md-8 p-0 pr-4 pl-3 pt-3">
+    <?php  display_title($the_id);?>
+            <?php display_date($date_format,$the_id)?>
+             <?php display_categories($display_cate, $the_id);?>
+             <?php  display_author($display_author, $the_id); ?> 
+            <?php display_excerpt($the_id, $excerpt_length);?>
+            <?php display_price($post_type, $display_price, $the_id );?>
+        </div>
+        <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
+        <div class="col-md-12 pl-0 pr-0 pt-2 text-right"><?php read_more(get_the_ID(), $link_title);?></div>
+    </div>
+    <?php
+}    
+    $html = ob_get_clean();
+    echo $html;
+}
 // TITLE
 function display_title($the_id){
     ob_start();?>
@@ -112,81 +178,73 @@ function apply_css_class($css_class){
 }
 
 
-//THE LAYOUT
-function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img_position=null, $display_cate=null, $display_author=null, $date_format=null ){
-    ob_start();
-    ?><?php if($img_position =="" || $img_position == "top"){?>
-        <div class="card h-100">
-        <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->   
-        <div class="card-body">
-            <?php  display_title($the_id);?>
-            <div class="date"><?php display_date($date_format,get_the_ID())?></div>
-            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
-            | <?php  display_author($the_id); ?></div>
-            <?php display_excerpt($the_id, $excerpt_length);?>
-        </div><!---ends card body--->
-        </div> <!---ends card div--->
-    <?php 
-}elseif($img_position == "bottom"){?>
-        <div class="card h-100">
-         
-        <div class="card-body">
-            <?php  display_title($the_id);?>
-            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
-            | <?php  display_author($the_id); ?></div>
-            <?php display_excerpt($the_id, $excerpt_length);?>
-        </div><!---ends card body--->
-        <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->  
-        </div> <!---ends card div--->
-    <?php 
-}elseif($img_position == "left"){
-    ?>
-    <div class="row border ml-auto mr-auto">
-        <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
-        <div class="col-md-8 p-0 pl-4 pr-3 pt-3">
-            <?php  display_title($the_id);?>
-            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
-            | <?php  display_author($the_id); ?></div>
-            <?php display_excerpt($the_id, $excerpt_length);?>
-        </div>
-    </div>
-    <?php
-}elseif($img_position == "right"){
-    ?>
-    <div class="row border ml-auto mr-auto">
-    <div class="col-md-8 p-0 pr-4 pl-3 pt-3">
-            <?php  display_title($the_id);?>
-            <div class="inline"><?php if($display_cate != ""): display_categories($the_id); endif;?>
-            | <?php  display_author($the_id); ?></div>
-            <?php display_excerpt($the_id, $excerpt_length);?>
-        </div>
-        <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
-    </div>
-    <?php
-}    
-    $html = ob_get_clean();
-    echo $html;
-}
+
 // DISPLAY CATEGORIES
 
-function display_categories($the_id){
+function display_categories($display_cate, $the_id ){
+    if($display_cate != ""): 
     $cats = get_the_category($the_id);
     ob_start();
     foreach ( $cats as $cat ): ?>
  <a href="<?php echo get_category_link($cat->cat_ID); ?>" class="category"><?php echo $cat->name; ?></a> 
     <?php endforeach;
+    endif;
     $html = ob_get_clean();
     echo $html;
 }
 
 //DISPLAY AUTHOR NAME
-function display_author($the_id){
-    echo "<span class='author'> By ".ucfirst(get_the_author())."</span>";
+function display_author($display_author,$the_id){
+    ob_start();
+    if(isset($display_author)):
+    ?> 
+        <span class="author">By <?php echo ucfirst(get_the_author());?></span>
+    <?php
+    endif;
+    $html = ob_get_clean();
+    echo $html;
 }
 //DISPLAY DATE
-function display_date($the_id){
-    echo '<em class="date">'.get_the_date( $date_format, $the_id ).'</em>';
+function display_date($date_format,$the_id){
+    ob_start();
+if(isset($date_format)):
+?> 
+    <em class="date"><?php echo get_the_date( $date_format, $the_id );?></em>
+<?php
+endif;
+$html = ob_get_clean();
+echo $html;
 }
+
+
+
+//DISPLAY PRICE
+function display_price($post_type,$display_price,$the_id){
+    ob_start();
+if($post_type === "product" && isset($display_price)):
+?> <?php $price = get_post_meta( $the_id, '_price', true ); ?>
+    <span class="price"><?php echo wc_price( $price ); ?></span>
+<?php
+endif;
+$html = ob_get_clean();
+echo $html;
+}
+
+
+
+//DISPLAY LINK BUTTON
+function read_more($the_id,$link_title){
+ob_start();
+if(isset($link_title)):
+?><div class="card-footer">
+    <a class="btn btn-secondary" href="<?php echo get_the_permalink($the_id);?>"><?php echo $link_title;?></a>
+  </div>  
+<?php
+endif;
+$html = ob_get_clean();
+echo $html;
+}
+
 // DISPLAY PAGINATION
 function pagination_bar( $custom_query ) {
     $total_pages = $custom_query->max_num_pages;
