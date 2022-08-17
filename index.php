@@ -2,7 +2,7 @@
 /*
 Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
-Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate='' link_title='' display_price=''] | Dated: 17 Aug, 2022
+Description: [pds] [pds no_excerpt='' post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate='' link_title='' display_price='' show_all_meta='' meta_field=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
 Version: 4
 Author URI: n/a
@@ -43,8 +43,8 @@ function loop_posts($atts)
 <?php $n++;?>
 	    <div class="<?php apply_css_class($col_class)?> portfolio-item post-<?php echo $n?>">
             
-        <?php the_layout($feat_img, get_the_ID(), '32', $img_position, $display_cate,$display_author,$date_format, $link_title,$display_price, $post_type);?> 
-
+        <?php the_layout($feat_img, get_the_ID(), '32', $no_excerpt, $img_position, $display_cate,$display_author,$date_format, $link_title,$display_price, $post_type, $meta_field);?> 
+            <?php if($show_all_meta == 'yes'): show_all_meta(); endif;?>
 	    </div>
 	    
         <?php endwhile; ?>
@@ -70,7 +70,7 @@ $html = ob_get_clean();
  *
  * * * */
 //THE LAYOUT
-function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img_position=null, $display_cate=null, $display_author=null, $date_format=null, $link_title=null, $display_price=null, $post_type=null){
+function the_layout($feat_img_height = null, $the_id, $excerpt_length=null,$no_excerpt =null, $img_position=null, $display_cate=null, $display_author=null, $date_format=null, $link_title=null, $display_price=null, $post_type=null, $meta_field=null){
     ob_start();
     ?><?php if($img_position =="" || $img_position == "top"){?>
         <div class="card h-100">
@@ -80,8 +80,9 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
             <?php display_date($date_format,$the_id)?>
             <?php display_categories($display_cate, $the_id);?>
              <?php  display_author($display_author, $the_id); ?> 
-            <?php display_excerpt($the_id, $excerpt_length);?>
+            <?php display_excerpt($no_excerpt,$the_id, $excerpt_length);?>
             <?php display_price($post_type, $display_price, $the_id );?>
+            <?php display_meta_field($meta_field, $the_id );?>
         </div><!---ends card body--->
         <?php read_more(get_the_ID(), $link_title);?>
         </div> <!---ends card div--->
@@ -94,8 +95,9 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
             <?php display_date($date_format,$the_id)?>
             <?php display_categories($display_cate, $the_id);?>
             <?php  display_author($display_author, $the_id); ?> 
-            <?php display_excerpt($the_id, $excerpt_length);?>  
-            <?php display_price($post_type, $display_price, $the_id );?>        
+            <?php display_excerpt($no_excerpt,$the_id, $excerpt_length);?> 
+            <?php display_price($post_type, $display_price, $the_id );?>      
+            <?php display_meta_field($meta_field, $the_id);?>  
         </div><!---ends card body--->
         <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->  
         <?php read_more(get_the_ID(), $link_title);?>
@@ -110,8 +112,9 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
             <?php display_date($date_format,$the_id)?>
             <?php display_categories($display_cate, $the_id);?>
             <?php  display_author($display_author, $the_id); ?> 
-            <?php display_excerpt($the_id, $excerpt_length);?>
+            <?php display_excerpt($no_excerpt,$the_id, $excerpt_length);?>
             <?php display_price($post_type, $display_price, $the_id );?>
+            <?php display_meta_field($meta_field, $the_id);?>
         </div>
         <div class="col-md-12 pl-0 pr-0 pt-2 text-right"><?php read_more(get_the_ID(), $link_title);?></div>
     </div>
@@ -124,8 +127,9 @@ function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img
             <?php display_date($date_format,$the_id)?>
              <?php display_categories($display_cate, $the_id);?>
              <?php  display_author($display_author, $the_id); ?> 
-            <?php display_excerpt($the_id, $excerpt_length);?>
+             <?php display_excerpt($no_excerpt,$the_id, $excerpt_length);?>
             <?php display_price($post_type, $display_price, $the_id );?>
+            <?php display_meta_field($meta_field, $the_id);?>
         </div>
         <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
         <div class="col-md-12 pl-0 pr-0 pt-2 text-right"><?php read_more(get_the_ID(), $link_title);?></div>
@@ -145,7 +149,8 @@ function display_title($the_id){
     echo $html;
 }
 // EXCERPT
-function display_excerpt($the_id, $excerpt_length){
+function display_excerpt($no_excerpt, $the_id, $excerpt_length){
+    if($no_excerpt != ""){ return;}
     ob_start();?>
 <div class="card-text"><?php echo substr( get_the_excerpt($the_id) ,0 ,($excerpt_length?$excerpt_length:'65' ) ); ?></div>
     <?php $html = ob_get_clean();
@@ -260,3 +265,27 @@ function pagination_bar( $custom_query ) {
         ));
     }
 }
+
+//DISPLAY META FIELD
+function display_meta_field($meta_field, $the_id){
+    if(isset($meta_field) && $meta_field !== ""):
+     $meta_field_arr = explode(',',$meta_field);  
+     foreach($meta_field_arr as $single):
+        $field = explode(':',$single); 
+    $the_meta_field = get_post_meta($the_id, $field[1], true);
+    if($the_meta_field != ""):
+    echo '<div><strong>'.$field[0].':</strong> '.$the_meta_field.'</div>';
+    endif;
+     endforeach;
+    endif;    
+}
+
+function show_all_meta(){
+      $meta = get_post_meta(get_the_ID()); ?>
+      <div style="display:block;position:relative;z-index:999999 !important;overflow:visiable;"><ol>
+      <?php foreach ($meta as $k=>$v): ?>
+        <li><strong><?php echo $k;?>:</strong> <?php echo $v[0];?></li>
+      <?php endforeach; ?>
+      </ol>
+      </div>
+<?php }
