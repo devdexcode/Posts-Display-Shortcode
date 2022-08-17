@@ -2,9 +2,9 @@
 /*
 Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
-Description: [pds] [pds post_type='' limit='' cate='' excerpt_length='' feat_img=''] | Dated: 10th Aug, 2022
+Description: [pds] [pds post_type='' row_class='' col_class='' img_position='' limit='' cate='' excerpt_length='' feat_img='' feat_img_height=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 1.0
+Version: 2.0
 Author URI: n/a
 Text Domain:  
  */
@@ -19,8 +19,6 @@ function loop_posts($atts)
 // print_r($atts); exit;
     $n = 1;
     $the_args = array(
-        // 'row_class' => $row_class,
-        // 'col_class' => $col_class,
         'post_type'         => $post_type,
         'category_name'     => $cate,
         'posts_per_page'    => $per_page,
@@ -38,27 +36,115 @@ function loop_posts($atts)
     $query = new WP_Query($the_args);
     ob_start();
     ?>
-<div class="row">
+<div class="row <?php apply_css_class($row_class)?>">
     <?php while ($query->have_posts()): $query->the_post();?>
-
-	    <div class="col-lg-4 col-sm-6 portfolio-item post-<?php echo $n?>">
-	            
-            <div class="card h-100">
-            <a style="max-height:220px;display:block;overflow:hidden;" href="<?php echo get_the_permalink(get_the_ID()); ?>">
-                <?php include 'inc/feat_img.php';?>
-            </a>    
-                <div class="card-body">
-                    <?php include 'inc/the_title.php';?>
-                    <?php include 'inc/the_excerpt.php';?>
-                </div>
-
-	        </div>
+<?php $n++;?>
+	    <div class="<?php apply_css_class($col_class)?> portfolio-item post-<?php echo $n?>">
+            
+        <?php the_layout($feat_img, get_the_ID(), '32', $img_position);?> 
 
 	    </div>
 	    
         <?php endwhile;?>
 </div>
 <?php
+
 $html = ob_get_clean();
     return $html;
+}
+
+
+/* * * * 
+ *  
+ * FUNCTIONS 
+ *
+ * * * */
+// TITLE
+function display_title($the_id){
+    ob_start();?>
+<h4 class="card-title">
+    <a href="<?php echo get_the_permalink($the_id); ?>" style="text-decoration:none;color:inherit;"><?php echo get_the_title($the_id); ?></a>
+</h4>
+    <?php $html = ob_get_clean();
+    echo $html;
+}
+// EXCERPT
+function display_excerpt($the_id, $excerpt_length){
+    ob_start();?>
+<div class="card-text"><?php echo substr( get_the_excerpt($the_id) ,0 ,($excerpt_length?$excerpt_length:'65' ) ); ?></div>
+    <?php $html = ob_get_clean();
+    echo $html;
+}
+// FEATURED IMAGE
+function display_feat_img($feat_img_height = null,$post_id){
+    ob_start();?>
+        <a style="max-height:<?php echo ($feat_img_height != "") ? $feat_img_height : '170px';?>;display:block;overflow:hidden;" href="<?php echo get_the_permalink(get_the_ID()); ?>">
+        <?php if ($feat_img != "no"):?>
+        <?php if (has_post_thumbnail()) {?>
+        <?php $image = wp_get_attachment_image_src(get_post_thumbnail_id($post_id), 'full');?>
+            <img src="<?php echo $image[0]; ?>" class="img-fluid ml-auto mr-auto card-img-top"/>
+        <?php }else{?> 
+        <svg height="auto" id="no-img-icon-<?php echo $post_id;?>" viewBox="0 0 32 32" width="100%" xmlns="http://www.w3.org/2000/svg"><defs><style>.cls-1{fill:none;}#no-img-icon-<?php echo $post_id;?>{padding:0;}</style></defs><title/>
+            <path fill="#EEE" d="M30,3.4141,28.5859,2,2,28.5859,3.4141,30l2-2H26a2.0027,2.0027,0,0,0,2-2V5.4141ZM26,26H7.4141l7.7929-7.793,2.3788,2.3787a2,2,0,0,0,2.8284,0L22,19l4,3.9973Zm0-5.8318-2.5858-2.5859a2,2,0,0,0-2.8284,0L19,19.1682l-2.377-2.3771L26,7.4141Z"/>
+                <path fill="#EEE" d="M6,22V19l5-4.9966,1.3733,1.3733,1.4159-1.416-1.375-1.375a2,2,0,0,0-2.8284,0L6,16.1716V6H22V4H6A2.002,2.002,0,0,0,4,6V22Z"/>
+            <rect class="cls-1 p-<?php echo $post_id;?>" data-name="no-img" height="100%" id="no-img" width="100%"/>
+        </svg>
+        <?php }?>
+        <?php endif;?>
+        </a> 
+    <?php $html = ob_get_clean();
+    echo $html;
+}
+
+//APPLY CSS CLASS ON ANY OBJECT
+function apply_css_class($css_class){
+   echo (isset($css_class) && !empty($css_class) ? $css_class : '');
+}
+
+
+//THE LAYOUT
+function the_layout($feat_img_height = null, $the_id, $excerpt_length=null, $img_position=null){
+    ob_start();
+    ?><?php if($img_position =="" || $img_position == "top"){?>
+        <div class="card h-100">
+        <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->   
+        <div class="card-body">
+            <?php  display_title($the_id);?>
+            <?php display_excerpt($the_id, $excerpt_length);?>
+        </div><!---ends card body--->
+        </div> <!---ends card div--->
+    <?php 
+}elseif($img_position == "bottom"){?>
+        <div class="card h-100">
+         
+        <div class="card-body">
+            <?php  display_title($the_id);?>
+            <?php display_excerpt($the_id, $excerpt_length);?>
+        </div><!---ends card body--->
+        <?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image--->  
+        </div> <!---ends card div--->
+    <?php 
+}elseif($img_position == "left"){
+    ?>
+    <div class="row border ml-auto mr-auto">
+        <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
+        <div class="col-md-8 p-0 pl-4 pr-3 pt-3">
+            <?php  display_title($the_id);?>
+            <?php display_excerpt($the_id, $excerpt_length);?>
+        </div>
+    </div>
+    <?php
+}elseif($img_position == "right"){
+    ?>
+    <div class="row border ml-auto mr-auto">
+    <div class="col-md-8 p-0 pr-4 pl-3 pt-3">
+            <?php  display_title($the_id);?>
+            <?php display_excerpt($the_id, $excerpt_length);?>
+        </div>
+        <div class="col-md-4 p-0"><?php display_feat_img($feat_img_height,$the_id);?><!---ends post feat image---></div>
+    </div>
+    <?php
+}    
+    $html = ob_get_clean();
+    echo $html;
 }

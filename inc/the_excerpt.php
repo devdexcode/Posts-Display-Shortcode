@@ -1,1 +1,0 @@
-<div class="card-text"><?php echo substr( get_the_excerpt() ,0 ,($excerpt_length?$excerpt_length:'65' ) ); ?></div>
