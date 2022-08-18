@@ -4,7 +4,7 @@ Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
 Description: [pds] [pds no_excerpt='' post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate='' link_title='' display_price='' show_all_meta='' meta_field=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 4
+Version: 5.1
 Author URI: n/a
 Text Domain:  
  */
@@ -152,7 +152,7 @@ function display_title($the_id){
 function display_excerpt($no_excerpt, $the_id, $excerpt_length){
     if($no_excerpt != ""){ return;}
     ob_start();?>
-<div class="card-text"><?php echo substr( get_the_excerpt($the_id) ,0 ,($excerpt_length?$excerpt_length:'65' ) ); ?></div>
+<div class="card-text excerpt"><?php echo substr( get_the_excerpt($the_id) ,0 ,($excerpt_length?$excerpt_length:'65' ) ); ?></div>
     <?php $html = ob_get_clean();
     echo $html;
 }
@@ -274,7 +274,7 @@ function display_meta_field($meta_field, $the_id){
         $field = explode(':',$single); 
     $the_meta_field = get_post_meta($the_id, $field[1], true);
     if($the_meta_field != ""):
-    echo '<div><strong>'.$field[0].':</strong> '.$the_meta_field.'</div>';
+    echo '<div class="meta_field '.$field[1].'"><strong>'.$field[0].':</strong> '.$the_meta_field.'</div>';
     endif;
      endforeach;
     endif;    
