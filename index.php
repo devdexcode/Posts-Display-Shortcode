@@ -4,7 +4,7 @@ Plugin Name: Posts Display Shortcode
 Plugin URI: n/a
 Description: [pds] [pds no_excerpt='' post_type='' row_class='' col_class='' img_position='' display_cate='' per_page='' cate='' excerpt_length='' feat_img='' feat_img_height='' display_author='' date_format='' cate='' link_title='' display_price='' show_all_meta='' meta_field=''] | Dated: 17 Aug, 2022
 Author:  Aamir Hussain
-Version: 5.1
+Version: 5.2
 Author URI: n/a
 Text Domain:  
  */
@@ -39,6 +39,7 @@ function loop_posts($atts)
     if($query->have_posts()):
     ?>
 <div class="row <?php apply_css_class($row_class)?>">
+<style>._categories > ._category{display: inline-block;} ._categories ._category:after { content:" ,";display:inline-block;} ._categories ._category:last-of-type:after { content:"";display:none;}</style>
     <?php while ($query->have_posts()): $query->the_post();?>
 <?php $n++;?>
 	    <div class="<?php apply_css_class($col_class)?> portfolio-item post-<?php echo $n?>">
@@ -190,9 +191,11 @@ function display_categories($display_cate, $the_id ){
     if($display_cate != ""): 
     $cats = get_the_category($the_id);
     ob_start();
+    echo '<div class="_categories">';
     foreach ( $cats as $cat ): ?>
- <a href="<?php echo get_category_link($cat->cat_ID); ?>" class="category"><?php echo $cat->name; ?></a> 
+ <a href="<?php echo get_category_link($cat->cat_ID); ?>" class="_category"><?php echo $cat->name; ?></a> 
     <?php endforeach;
+    echo '</div>';
     endif;
     $html = ob_get_clean();
     echo $html;
@@ -282,7 +285,8 @@ function display_meta_field($meta_field, $the_id){
 
 function show_all_meta(){
       $meta = get_post_meta(get_the_ID()); ?>
-      <div style="display:block;position:relative;z-index:999999 !important;overflow:visiable;"><ol>
+      <div style="display:block;position:relative;z-index:999999 !important;overflow:visiable;">
+      <ol>
       <?php foreach ($meta as $k=>$v): ?>
         <li><strong><?php echo $k;?>:</strong> <?php echo $v[0];?></li>
       <?php endforeach; ?>
